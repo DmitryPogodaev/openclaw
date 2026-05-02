@@ -281,6 +281,10 @@ function createPluginCandidatesFromManifestRegistry(
 
 export function clearPluginLoaderCache(): void {
   pluginLoaderCacheState.clear();
+  clearActivatedPluginRuntimeState();
+}
+
+export function clearActivatedPluginRuntimeState(): void {
   clearAgentHarnesses();
   clearPluginCommands();
   clearCompactionProviders();
@@ -288,6 +292,10 @@ export function clearPluginLoaderCache(): void {
   clearPluginInteractiveHandlers();
   clearMemoryEmbeddingProviders();
   clearMemoryPluginState();
+}
+
+export function clearPluginRegistryLoadCache(): void {
+  pluginLoaderCacheState.clearCachedRegistries();
 }
 
 const defaultLogger = () => createSubsystemLogger("plugins");
@@ -1187,11 +1195,7 @@ export function loadOpenClawPlugins(options: PluginLoadOptions = {}): PluginRegi
   if (requestedOnlyPluginIdSet && requestedOnlyPluginIdSet.size === 0) {
     const emptyRegistry = createEmptyPluginRegistry();
     if (options.activate !== false) {
-      clearAgentHarnesses();
-      clearPluginCommands();
-      clearPluginInteractiveHandlers();
-      clearDetachedTaskLifecycleRuntimeRegistration();
-      clearMemoryPluginState();
+      clearActivatedPluginRuntimeState();
       activatePluginRegistry(
         emptyRegistry,
         `empty-plugin-scope::${resolveRuntimeSubagentMode(options.runtimeOptions)}::${options.workspaceDir ?? ""}`,
@@ -1257,11 +1261,7 @@ export function loadOpenClawPlugins(options: PluginLoadOptions = {}): PluginRegi
     // Clear previously registered plugin state before reloading.
     // Skip for non-activating (snapshot) loads to avoid wiping commands from other plugins.
     if (shouldActivate) {
-      clearAgentHarnesses();
-      clearPluginCommands();
-      clearPluginInteractiveHandlers();
-      clearDetachedTaskLifecycleRuntimeRegistration();
-      clearMemoryPluginState();
+      clearActivatedPluginRuntimeState();
     }
 
     // Lazy: avoid creating module loaders when all plugins are disabled (common in unit tests).
